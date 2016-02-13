@@ -19,6 +19,7 @@ public class MainController : MonoBehaviour
 	private GameObject shortDescription;
 	private GameObject startTime;
 	private GameObject endTime;
+	private GameObject circle;
 
 	void Start() {
 	}
@@ -36,6 +37,7 @@ public class MainController : MonoBehaviour
 		shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
 		startTime = GameObject.Find("Canvas/Footer/Seekbar/Time");
 		endTime = GameObject.Find("Canvas/Footer/Seekbar/EndTime");
+		circle = GameObject.Find ("Canvas/Footer/Seekbar/circle");
 
 		audioSource.PlayOneShot(Resources.Load("SE/start", typeof(AudioClip)) as AudioClip);
 		yield return new WaitForSeconds(0.5f);
@@ -71,6 +73,11 @@ public class MainController : MonoBehaviour
 				shortDescription.GetComponent<Text>().text = article.shortDescription;
 			}
 
+			if (circle != null) {
+				circle.transform.position = new Vector3(-204, circle.transform.position.y, circle.transform.position.z);
+				//				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(-204, circle.transform.position.y, 0), "time", 0, "easeType", "linear" ));
+				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(373, circle.transform.position.y, 0), "time", maxAudioTime - 1, "easeType", "linear"));
+			}
         }
     }
 
@@ -106,7 +113,7 @@ public class MainController : MonoBehaviour
 			audioTime -= Time.deltaTime;
 			TimeSpan ts = TimeSpan.FromSeconds(audioTime);
 			Debug.Log ("audioTime:" + audioTime + " ts:" + ts.Seconds);
-			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 250.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
+			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
 			float nowAudioTime = maxAudioTime - audioTime;
 			TimeSpan nts = TimeSpan.FromSeconds(nowAudioTime);
 			startTime.GetComponent<Text>().text = nts.Seconds.ToString();
