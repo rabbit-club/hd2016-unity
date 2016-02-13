@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 using System.IO;
 using System.Collections;
 using LitJson;
@@ -13,9 +14,11 @@ public class MainController : MonoBehaviour
     string urlBase = "http://210.140.161.190:3000/";
     public string filePath = "";
     private AudioSource audioSource;
+	private float maxAudioTime;
 	private float audioTime;
 	private GameObject shortDescription;
-	private GameObject title;
+	private GameObject startTime;
+	private GameObject endTime;
 
 	void Start() {
 	}
@@ -28,10 +31,11 @@ public class MainController : MonoBehaviour
     {
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
 		audioTime = 0.0f;
+		maxAudioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
 		shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
-		title = GameObject.Find("Info/Text");
-
+		startTime = GameObject.Find("Canvas/Footer/Seekbar/Time");
+		endTime = GameObject.Find("Canvas/Footer/Seekbar/EndTime");
         // JSON取得
         WWW www = new WWW(urlBase + "articles");
         yield return www;
@@ -59,10 +63,6 @@ public class MainController : MonoBehaviour
 				shortDescription.GetComponent<Text>().text = article.shortDescription;
 			}
 
-			// 記事タイトルの表示
-			if(title != null) {
-				title.GetComponent<Text>().text = article.title;
-			}
         }
     }
 
@@ -88,15 +88,21 @@ public class MainController : MonoBehaviour
             Debug.Log("download file write success." + filePath);
             audioSource.PlayOneShot(www.audioClip);
 			// 音声の時間を保存しておく
-			audioTime = www.audioClip.length;
+			maxAudioTime = www.audioClip.length;
+			audioTime = maxAudioTime;
         }
     }
 
 	void Update() {
 		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
 			audioTime -= Time.deltaTime;
-			Debug.Log ("audioTime:" + audioTime);
-			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
+			TimeSpan ts = TimeSpan.FromSeconds(audioTime);
+			Debug.Log ("audioTime:" + audioTime + " ts:" + ts.Seconds);
+			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 250.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
+			float nowAudioTime = maxAudioTime - audioTime;
+			TimeSpan nts = TimeSpan.FromSeconds(nowAudioTime);
+			startTime.GetComponent<Text>().text = nts.Seconds.ToString();
+			endTime.GetComponent<Text>().text = ts.Seconds.ToString();
 		}
 		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
 		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
