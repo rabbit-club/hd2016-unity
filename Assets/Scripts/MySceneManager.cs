@@ -10,7 +10,7 @@ public class MySceneManager : MonoBehaviour {
 
 	void Start () {
 		SceneManager.LoadScene("spaceship", LoadSceneMode.Additive);
-		SceneManager.LoadScene("UIScene", LoadSceneMode.Additive);
+//		SceneManager.LoadScene("UIScene", LoadSceneMode.Additive);
 		backGroundImage.CrossFadeAlpha (0, 1.0f, true);
 	}
 	
