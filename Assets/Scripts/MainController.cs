@@ -38,12 +38,9 @@ public class MainController : MonoBehaviour
             StartCoroutine(download(article.voicePath));
         }
 
-<<<<<<< HEAD
 		audioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
         StartCoroutine(download("test01.wav"));
-=======
->>>>>>> 143eb9a3f4c54827eb0efcfc1d8335493163138a
     }
 
     IEnumerator download(string filePathUrl)
@@ -72,7 +69,6 @@ public class MainController : MonoBehaviour
         }
     }
 
-<<<<<<< HEAD
 	void Update() {
 		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
 			audioTime -= Time.deltaTime;
@@ -82,8 +78,8 @@ public class MainController : MonoBehaviour
 			Debug.Log ("audioTime less zero.");
 		}
 	}
-=======
-    [System.Serializable]
+
+	[System.Serializable]
     public class ArticleData
     {
         public string url;
@@ -92,5 +88,4 @@ public class MainController : MonoBehaviour
         public string imagePath;
         public string voicePath;
     }
->>>>>>> 143eb9a3f4c54827eb0efcfc1d8335493163138a
 }
