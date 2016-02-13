@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.IO;
 using System.Collections;
+using LitJson;
 
 public class MainController : MonoBehaviour
 {
@@ -16,26 +17,38 @@ public class MainController : MonoBehaviour
     IEnumerator Start()
     {
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
-
-        imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
-
-        WWW www = new WWW(imageUrl);
+        audioSource = GetComponent<AudioSource>();
+        // JSON取得
+        WWW www = new WWW(urlBase + "articles");
         yield return www;
+        ArticleData[] articles = JsonMapper.ToObject<ArticleData[]>(www.text);
+        foreach (var article in articles)
+        {
+            imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
+//            www = new WWW(article.imagePath);
+            www = new WWW(imageUrl);
+            yield return www;
 
-        DisplaySprite.sprite = Sprite.Create(
-            www.texture, 
-            new Rect(0, 0, 400, 300), 
-            new Vector2(0.5f, 0.5f)
-        );
+            DisplaySprite.sprite = Sprite.Create(
+                www.texture, 
+                new Rect(0, 0, 400, 300), 
+                new Vector2(0.5f, 0.5f)
+            );
 
+            StartCoroutine(download(article.voicePath));
+        }
+
+<<<<<<< HEAD
 		audioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
         StartCoroutine(download("test01.wav"));
+=======
+>>>>>>> 143eb9a3f4c54827eb0efcfc1d8335493163138a
     }
 
-    IEnumerator download(string fileName)
+    IEnumerator download(string filePathUrl)
     {
-        WWW www = new WWW(urlBase + "/" + fileName);
+        WWW www = new WWW(filePathUrl);
 
         while (!www.isDone)
         { // ダウンロードの進捗を表示
@@ -59,6 +72,7 @@ public class MainController : MonoBehaviour
         }
     }
 
+<<<<<<< HEAD
 	void Update() {
 		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
 			audioTime -= Time.deltaTime;
@@ -68,4 +82,15 @@ public class MainController : MonoBehaviour
 			Debug.Log ("audioTime less zero.");
 		}
 	}
+=======
+    [System.Serializable]
+    public class ArticleData
+    {
+        public string url;
+        public string title;
+        public string shortDescription;
+        public string imagePath;
+        public string voicePath;
+    }
+>>>>>>> 143eb9a3f4c54827eb0efcfc1d8335493163138a
 }
