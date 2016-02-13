@@ -11,7 +11,7 @@ public class MainController : MonoBehaviour {
 	{
 		DisplaySprite = Display.GetComponent<SpriteRenderer>();
 
-		imageUrl = "amd.c.yimg.jp/amd/20160213-00010005-tennisd-000-1-view.jpg";
+		imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
 
 		WWW www = new WWW(imageUrl);
 		yield return www;
