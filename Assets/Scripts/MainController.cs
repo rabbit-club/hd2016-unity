@@ -15,6 +15,7 @@ public class MainController : MonoBehaviour
     private AudioSource audioSource;
 	private float audioTime;
 	private GameObject shortDescription;
+	private GameObject title;
 
 	void Start() {
 	}
@@ -29,6 +30,8 @@ public class MainController : MonoBehaviour
 		audioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
 		shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
+		title = GameObject.Find("Info/Text");
+
         // JSON取得
         WWW www = new WWW(urlBase + "articles");
         yield return www;
@@ -56,6 +59,10 @@ public class MainController : MonoBehaviour
 				shortDescription.GetComponent<Text>().text = article.shortDescription;
 			}
 
+			// 記事タイトルの表示
+			if(title != null) {
+				title.GetComponent<Text>().text = article.title;
+			}
         }
     }
 
@@ -89,7 +96,7 @@ public class MainController : MonoBehaviour
 		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
 			audioTime -= Time.deltaTime;
 			Debug.Log ("audioTime:" + audioTime);
-			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 250.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
+			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
 		}
 		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
 		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
