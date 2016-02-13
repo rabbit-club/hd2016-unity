@@ -15,47 +15,49 @@ public class MainController : MonoBehaviour
     string urlBase = "http://210.140.161.190:3000/";
     public string filePath = "";
     private AudioSource audioSource;
-	private float maxAudioTime;
-	private float audioTime;
-	private GameObject shortDescription;
-	private GameObject title;
-	private GameObject startTime;
-	private GameObject endTime;
-	private GameObject circle;
-	public FaceUpdate faceUpdate;
-	Animator anim;
-	float mouseTimer;
-	bool mouseClose;
+    private float maxAudioTime;
+    private float audioTime;
+    private GameObject shortDescription;
+    private GameObject title;
+    private GameObject startTime;
+    private GameObject endTime;
+    private GameObject circle;
+    public FaceUpdate faceUpdate;
+    Animator anim;
+    float mouseTimer;
+    bool mouseClose;
 
-	void Start() {
-	}
+    void Start()
+    {
+    }
 
-	public void Movie() {
-		StartCoroutine(MovieStart());
-	}
+    public void Movie()
+    {
+        StartCoroutine(MovieStart());
+    }
 
     IEnumerator MovieStart()
     {
-		mouseTimer = 0;
-		mouseClose = true;
-		anim = faceUpdate.anim;
-		anim.CrossFade (faceUpdate.animations [12].name, 0);
+        mouseTimer = 0;
+        mouseClose = true;
+        anim = faceUpdate.anim;
+        anim.CrossFade(faceUpdate.animations[12].name, 0);
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
-		audioTime = 0.0f;
-		maxAudioTime = 0.0f;
+        audioTime = 0.0f;
+        maxAudioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
-		shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
-		title = GameObject.Find("Content/Info/Text");
-		startTime = GameObject.Find("Canvas/Footer/Seekbar/Time");
-		endTime = GameObject.Find("Canvas/Footer/Seekbar/EndTime");
-		circle = GameObject.Find ("Canvas/Footer/Seekbar/circle");
+        shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
+        title = GameObject.Find("Content/Info/Text");
+        startTime = GameObject.Find("Canvas/Footer/Seekbar/Time");
+        endTime = GameObject.Find("Canvas/Footer/Seekbar/EndTime");
+        circle = GameObject.Find("Canvas/Footer/Seekbar/circle");
 
-		audioSource.PlayOneShot(Resources.Load("SE/start", typeof(AudioClip)) as AudioClip);
-		yield return new WaitForSeconds(0.5f);
+        audioSource.PlayOneShot(Resources.Load("SE/start", typeof(AudioClip)) as AudioClip);
+        yield return new WaitForSeconds(0.5f);
 
-		AudioClip hello = Resources.Load ("Voices/ohiru", typeof(AudioClip)) as AudioClip;
-		audioSource.PlayOneShot(hello);
-		yield return new WaitForSeconds(2.5f);
+        AudioClip hello = Resources.Load("Voices/ohiru", typeof(AudioClip)) as AudioClip;
+        audioSource.PlayOneShot(hello);
+        yield return new WaitForSeconds(2.5f);
 
         // JSON取得
         WWW www = new WWW(urlBase + "articles");
@@ -63,42 +65,91 @@ public class MainController : MonoBehaviour
         ArticleData[] articles = JsonMapper.ToObject<ArticleData[]>(www.text);
         foreach (var article in articles)
         {
-			// 音声の取得と再生
-			yield return new WaitForSeconds(audioTime);
+            // 音声の取得と再生
+            yield return new WaitForSeconds(audioTime);
             StartCoroutine(download(article.voicePathWav));
-			yield return new WaitForSeconds(1.0f);
+            yield return new WaitForSeconds(1.0f);
 
-			www = new WWW(article.imagePath);
-			yield return www;
+            www = new WWW(article.imagePath);
+            yield return www;
 
-			DisplaySprite.sprite = Sprite.Create(
-				www.texture, 
-				new Rect(0, 0, 400, 300), 
-				new Vector2(0.5f, 0.5f)
-			);
+            Texture2D tex = www.texture;
+            int x = 400;
+            int y = 300;
+            if (tex.width >= x && tex.height >= y)
+            {
+                DisplaySprite.sprite = Sprite.Create(
+                    tex, 
+                    new Rect(0, 0, x, y), 
+                    new Vector2(0.5f, 0.5f)
+                );
+            }
+            else if (tex.width >= x || tex.height < y)
+            {
+                double tmpWidth = tex.width;
+                double tmpHeight = tex.height;
+                double yy = y;
+                double d = (double)(tmpWidth * (yy / tmpHeight));
+                double e = (double)(tmpHeight * (yy / tmpHeight));
+                int a = (int)Math.Ceiling(d);
+                int b = (int)Math.Ceiling(e);
+                TextureScale.Bilinear(tex, a, b);
+                DisplaySprite.sprite = Sprite.Create(
+                    tex, 
+                    new Rect(0, 0, x, y), 
+                    new Vector2(0.5f, 0.5f)
+                );
+            }
+            else if (tex.width < x || tex.height >= y)
+            {
+                double tmpWidth = tex.width;
+                double tmpHeight = tex.height;
+                double xx = x;
+                double d = (double)(tmpWidth * (xx / tmpWidth));
+                double e = (double)(tmpHeight * (xx / tmpWidth));
+                int a = (int)Math.Ceiling(d);
+                int b = (int)Math.Ceiling(e);
+                TextureScale.Bilinear(tex, a, b);
+                DisplaySprite.sprite = Sprite.Create(
+                    tex, 
+                    new Rect(0, 0, x, y), 
+                    new Vector2(0.5f, 0.5f)
+                );
+            }
+            else
+            {
+                DisplaySprite.sprite = Sprite.Create(
+                    tex, 
+                    new Rect(0, 0, tex.width, tex.height), 
+                    new Vector2(0.5f, 0.5f)
+                );
+            }
 
-			// 要約記事テキストの表示
-			if(shortDescription != null) {
-				// 位置を初期化
-				shortDescription.transform.localPosition = new Vector3(5500.0f, shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
-				shortDescription.GetComponent<Text>().text = article.shortDescription;
-			}
+            // 要約記事テキストの表示
+            if (shortDescription != null)
+            {
+                // 位置を初期化
+                shortDescription.transform.localPosition = new Vector3(5500.0f, shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
+                shortDescription.GetComponent<Text>().text = article.shortDescription;
+            }
 
-			// 記事タイトルの表示
-			if(title != null) {
-				title.GetComponent<Text>().text = article.title;
-			}
+            // 記事タイトルの表示
+            if (title != null)
+            {
+                title.GetComponent<Text>().text = article.title;
+            }
 
-			// シークバーを動かす
-			if (circle != null) {
-				circle.transform.position = new Vector3(-204, circle.transform.position.y, circle.transform.position.z);
-				//				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(-204, circle.transform.position.y, 0), "time", 0, "easeType", "linear" ));
-				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(373, circle.transform.position.y, 0), "time", maxAudioTime - 1, "easeType", "linear"));
-			}
+            // シークバーを動かす
+            if (circle != null)
+            {
+                circle.transform.position = new Vector3(-204, circle.transform.position.y, circle.transform.position.z);
+                //				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(-204, circle.transform.position.y, 0), "time", 0, "easeType", "linear" ));
+                iTween.MoveTo(circle, iTween.Hash("position", new Vector3(373, circle.transform.position.y, 0), "time", maxAudioTime - 1, "easeType", "linear"));
+            }
 
-			// 音声時間maxの表示
-			TimeSpan maxTs = TimeSpan.FromSeconds(maxAudioTime);
-			endTime.GetComponent<Text>().text = maxTs.Seconds.ToString();
+            // 音声時間maxの表示
+            TimeSpan maxTs = TimeSpan.FromSeconds(maxAudioTime);
+            endTime.GetComponent<Text>().text = maxTs.Seconds.ToString();
         }
     }
 
@@ -123,43 +174,51 @@ public class MainController : MonoBehaviour
             File.WriteAllBytes(filePath, www.bytes);
             Debug.Log("download file write success." + filePath);
             audioSource.PlayOneShot(www.audioClip);
-			// 音声の時間を保存しておく
-			maxAudioTime = www.audioClip.length;
-			audioTime = maxAudioTime;
+            // 音声の時間を保存しておく
+            maxAudioTime = www.audioClip.length;
+            audioTime = maxAudioTime;
         }
     }
 
-	void Update() {
-		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
-			mouseTimer += Time.deltaTime;
-			if (mouseTimer > 0.1f) {
-				paku();
-				mouseTimer = 0;
-				mouseClose = !mouseClose;
-			}
-			audioTime -= Time.deltaTime;
-			TimeSpan ts = TimeSpan.FromSeconds(audioTime);
+    void Update()
+    {
+        if (audioSource != null && audioSource.isPlaying && audioTime >= 0.0f)
+        {
+            mouseTimer += Time.deltaTime;
+            if (mouseTimer > 0.1f)
+            {
+                paku();
+                mouseTimer = 0;
+                mouseClose = !mouseClose;
+            }
+            audioTime -= Time.deltaTime;
+            TimeSpan ts = TimeSpan.FromSeconds(audioTime);
 //			Debug.Log ("audioTime:" + audioTime + " ts:" + ts.Seconds);
-			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
-			float nowAudioTime = maxAudioTime - audioTime;
-			TimeSpan nts = TimeSpan.FromSeconds(nowAudioTime);
-			startTime.GetComponent<Text>().text = nts.Seconds.ToString();
-		}
-		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
-		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
-			Debug.Log ("audioTime less zero.");
-		}
-	}
+            shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
+            float nowAudioTime = maxAudioTime - audioTime;
+            TimeSpan nts = TimeSpan.FromSeconds(nowAudioTime);
+            startTime.GetComponent<Text>().text = nts.Seconds.ToString();
+        }
+        // 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
+        if ((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f)
+        {
+            Debug.Log("audioTime less zero.");
+        }
+    }
 
-	void paku() {
-		if (mouseClose) {
-			faceUpdate.OnCallChangeFace(faceUpdate.animations[0].name);
-		} else {
-			faceUpdate.OnCallChangeFace(faceUpdate.animations[12].name);
-		}
-	}
+    void paku()
+    {
+        if (mouseClose)
+        {
+            faceUpdate.OnCallChangeFace(faceUpdate.animations[0].name);
+        }
+        else
+        {
+            faceUpdate.OnCallChangeFace(faceUpdate.animations[12].name);
+        }
+    }
 
-	[System.Serializable]
+    [System.Serializable]
     public class ArticleData
     {
         public string url;
@@ -167,6 +226,6 @@ public class MainController : MonoBehaviour
         public string shortDescription;
         public string imagePath;
         public string voicePathOgg;
-		public string voicePathWav;
+        public string voicePathWav;
     }
 }
