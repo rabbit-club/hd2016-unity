@@ -17,6 +17,7 @@ public class MainController : MonoBehaviour
 	private float maxAudioTime;
 	private float audioTime;
 	private GameObject shortDescription;
+	private GameObject title;
 	private GameObject startTime;
 	private GameObject endTime;
 	private GameObject circle;
@@ -35,6 +36,7 @@ public class MainController : MonoBehaviour
 		maxAudioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
 		shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
+		title = GameObject.Find("Content/Info/Text");
 		startTime = GameObject.Find("Canvas/Footer/Seekbar/Time");
 		endTime = GameObject.Find("Canvas/Footer/Seekbar/EndTime");
 		circle = GameObject.Find ("Canvas/Footer/Seekbar/circle");
@@ -71,6 +73,11 @@ public class MainController : MonoBehaviour
 				// 位置を初期化
 				shortDescription.transform.localPosition = new Vector3(5500.0f, shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
 				shortDescription.GetComponent<Text>().text = article.shortDescription;
+			}
+
+			// 記事タイトルの表示
+			if(title != null) {
+				title.GetComponent<Text>().text = article.title;
 			}
 
 			if (circle != null) {
