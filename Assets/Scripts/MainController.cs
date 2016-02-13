@@ -22,6 +22,7 @@ public class MainController : MonoBehaviour
 		UnityChanAnim = UnityChan.GetComponent<Animator>();
 
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
+		audioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
         // JSON取得
         WWW www = new WWW(urlBase + "articles");
@@ -41,12 +42,11 @@ public class MainController : MonoBehaviour
                 new Vector2(0.5f, 0.5f)
             );
 
-            StartCoroutine(download(article.voicePath));
+			yield return new WaitForSeconds(audioTime);
+            StartCoroutine(download(article.voicePathWav));
+			yield return new WaitForSeconds(0.5f);
         }
 
-		audioTime = 0.0f;
-        audioSource = GetComponent<AudioSource>();
-        StartCoroutine(download("test01.wav"));
     }
 
     IEnumerator download(string filePathUrl)
@@ -78,6 +78,7 @@ public class MainController : MonoBehaviour
 	void Update() {
 		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
 			audioTime -= Time.deltaTime;
+			Debug.Log ("audioTime:" + audioTime);
 		}
 		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
 		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
@@ -92,6 +93,7 @@ public class MainController : MonoBehaviour
         public string title;
         public string shortDescription;
         public string imagePath;
-        public string voicePath;
+        public string voicePathOgg;
+		public string voicePathWav;
     }
 }
