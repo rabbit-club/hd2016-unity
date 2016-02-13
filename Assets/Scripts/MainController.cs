@@ -14,8 +14,13 @@ public class MainController : MonoBehaviour
     private AudioSource audioSource;
 	private float audioTime;
 
+	public GameObject UnityChan;
+	Animator UnityChanAnim;
+
     IEnumerator Start()
     {
+		UnityChanAnim = UnityChan.GetComponent<Animator>();
+
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
         audioSource = GetComponent<AudioSource>();
         // JSON取得
@@ -24,7 +29,8 @@ public class MainController : MonoBehaviour
         ArticleData[] articles = JsonMapper.ToObject<ArticleData[]>(www.text);
         foreach (var article in articles)
         {
-            imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
+			imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
+
 //            www = new WWW(article.imagePath);
             www = new WWW(imageUrl);
             yield return www;
