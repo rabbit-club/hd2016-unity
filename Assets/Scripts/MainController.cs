@@ -168,8 +168,10 @@ public class MainController : MonoBehaviour
             filePath = Application.persistentDataPath + "/" + Path.GetFileName(www.url);
             File.WriteAllBytes(filePath, www.bytes);
             Debug.Log("download file write success." + filePath);
-            audioSource.PlayOneShot(www.audioClip);
-            // 音声の時間を保存しておく
+//            audioSource.PlayOneShot(www.audioClip);
+			audioSource.clip = www.audioClip;
+			audioSource.Play();
+			// 音声の時間を保存しておく
             maxAudioTime = www.audioClip.length;
             audioTime = maxAudioTime;
         }
