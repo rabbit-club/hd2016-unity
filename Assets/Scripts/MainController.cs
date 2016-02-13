@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using System.IO;
 using System.Collections;
@@ -13,6 +14,7 @@ public class MainController : MonoBehaviour
     public string filePath = "";
     private AudioSource audioSource;
 	private float audioTime;
+	private GameObject shortDescription;
 
 	void Start() {
 	}
@@ -26,12 +28,14 @@ public class MainController : MonoBehaviour
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
 		audioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
+		shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
         // JSON取得
         WWW www = new WWW(urlBase + "articles");
         yield return www;
         ArticleData[] articles = JsonMapper.ToObject<ArticleData[]>(www.text);
         foreach (var article in articles)
         {
+			// 音声の取得と再生
 			yield return new WaitForSeconds(audioTime);
             StartCoroutine(download(article.voicePathWav));
 			yield return new WaitForSeconds(0.5f);
@@ -44,6 +48,14 @@ public class MainController : MonoBehaviour
 				new Rect(0, 0, 400, 300), 
 				new Vector2(0.5f, 0.5f)
 			);
+
+			// 要約記事テキストの表示
+			if(shortDescription != null) {
+				// 位置を初期化
+				shortDescription.transform.localPosition = new Vector3(5500.0f, shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
+				shortDescription.GetComponent<Text>().text = article.shortDescription;
+			}
+
         }
     }
 
@@ -77,6 +89,7 @@ public class MainController : MonoBehaviour
 		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
 			audioTime -= Time.deltaTime;
 			Debug.Log ("audioTime:" + audioTime);
+			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 250.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
 		}
 		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
 		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
