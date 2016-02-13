@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.IO;
 using System.Collections;
+using LitJson;
 
 public class MainController : MonoBehaviour
 {
@@ -15,25 +16,32 @@ public class MainController : MonoBehaviour
     IEnumerator Start()
     {
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
-
-        imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
-
-        WWW www = new WWW(imageUrl);
-        yield return www;
-
-        DisplaySprite.sprite = Sprite.Create(
-            www.texture, 
-            new Rect(0, 0, 400, 300), 
-            new Vector2(0.5f, 0.5f)
-        );
-
         audioSource = GetComponent<AudioSource>();
-        StartCoroutine(download("test01.wav"));
+        // JSON取得
+        WWW www = new WWW(urlBase + "articles");
+        yield return www;
+        ArticleData[] articles = JsonMapper.ToObject<ArticleData[]>(www.text);
+        foreach (var article in articles)
+        {
+            imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
+//            www = new WWW(article.imagePath);
+            www = new WWW(imageUrl);
+            yield return www;
+
+            DisplaySprite.sprite = Sprite.Create(
+                www.texture, 
+                new Rect(0, 0, 400, 300), 
+                new Vector2(0.5f, 0.5f)
+            );
+
+            StartCoroutine(download(article.voicePath));
+        }
+
     }
 
-    IEnumerator download(string fileName)
+    IEnumerator download(string filePathUrl)
     {
-        WWW www = new WWW(urlBase + "/" + fileName);
+        WWW www = new WWW(filePathUrl);
 
         while (!www.isDone)
         { // ダウンロードの進捗を表示
@@ -53,5 +61,15 @@ public class MainController : MonoBehaviour
             Debug.Log("download file write success." + filePath);
             audioSource.PlayOneShot(www.audioClip);
         }
+    }
+
+    [System.Serializable]
+    public class ArticleData
+    {
+        public string url;
+        public string title;
+        public string shortDescription;
+        public string imagePath;
+        public string voicePath;
     }
 }
