@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityChan;
 using System;
 using System.IO;
 using System.Collections;
@@ -21,6 +22,10 @@ public class MainController : MonoBehaviour
 	private GameObject startTime;
 	private GameObject endTime;
 	private GameObject circle;
+	public FaceUpdate faceUpdate;
+	Animator anim;
+	float mouseTimer;
+	bool mouseClose;
 
 	void Start() {
 	}
@@ -31,6 +36,10 @@ public class MainController : MonoBehaviour
 
     IEnumerator MovieStart()
     {
+		mouseTimer = 0;
+		mouseClose = true;
+		anim = faceUpdate.anim;
+		anim.CrossFade (faceUpdate.animations [12].name, 0);
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
 		audioTime = 0.0f;
 		maxAudioTime = 0.0f;
@@ -122,9 +131,15 @@ public class MainController : MonoBehaviour
 
 	void Update() {
 		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
+			mouseTimer += Time.deltaTime;
+			if (mouseTimer > 0.1f) {
+				paku();
+				mouseTimer = 0;
+				mouseClose = !mouseClose;
+			}
 			audioTime -= Time.deltaTime;
 			TimeSpan ts = TimeSpan.FromSeconds(audioTime);
-			Debug.Log ("audioTime:" + audioTime + " ts:" + ts.Seconds);
+//			Debug.Log ("audioTime:" + audioTime + " ts:" + ts.Seconds);
 			shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
 			float nowAudioTime = maxAudioTime - audioTime;
 			TimeSpan nts = TimeSpan.FromSeconds(nowAudioTime);
@@ -133,6 +148,14 @@ public class MainController : MonoBehaviour
 		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
 		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
 			Debug.Log ("audioTime less zero.");
+		}
+	}
+
+	void paku() {
+		if (mouseClose) {
+			faceUpdate.OnCallChangeFace(faceUpdate.animations[0].name);
+		} else {
+			faceUpdate.OnCallChangeFace(faceUpdate.animations[12].name);
 		}
 	}
 
