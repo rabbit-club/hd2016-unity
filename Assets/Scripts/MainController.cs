@@ -30,21 +30,19 @@ public class MainController : MonoBehaviour
         ArticleData[] articles = JsonMapper.ToObject<ArticleData[]>(www.text);
         foreach (var article in articles)
         {
-			imageUrl = "http://www.footballchannel.jp/wordpress/assets/2013/03/20130329_ni.jpg";
-
-//            www = new WWW(article.imagePath);
-            www = new WWW(imageUrl);
-            yield return www;
-
-            DisplaySprite.sprite = Sprite.Create(
-                www.texture, 
-                new Rect(0, 0, 400, 300), 
-                new Vector2(0.5f, 0.5f)
-            );
-
 			yield return new WaitForSeconds(audioTime);
             StartCoroutine(download(article.voicePathWav));
 			yield return new WaitForSeconds(0.5f);
+
+			www = new WWW(article.imagePath);
+			yield return www;
+
+			DisplaySprite.sprite = Sprite.Create(
+				www.texture, 
+				new Rect(0, 0, 400, 300), 
+				new Vector2(0.5f, 0.5f)
+			);
+
         }
 
     }
