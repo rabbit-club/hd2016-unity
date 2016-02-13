@@ -24,22 +24,18 @@ public class MainController : MonoBehaviour
     private GameObject circle;
     public FaceUpdate faceUpdate;
     Animator anim;
-    float mouseTimer;
-    bool mouseClose;
+//    float mouseTimer;
+//    bool mouseClose;
 
-    void Start()
-    {
-    }
-
-    public void Movie()
+	public void Movie()
     {
         StartCoroutine(MovieStart());
     }
 
     IEnumerator MovieStart()
     {
-        mouseTimer = 0;
-        mouseClose = true;
+//        mouseTimer = 0;
+//        mouseClose = true;
         anim = faceUpdate.anim;
         anim.CrossFade(faceUpdate.animations[12].name, 0);
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
@@ -143,7 +139,6 @@ public class MainController : MonoBehaviour
             if (circle != null)
             {
                 circle.transform.position = new Vector3(-204, circle.transform.position.y, circle.transform.position.z);
-                //				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(-204, circle.transform.position.y, 0), "time", 0, "easeType", "linear" ));
                 iTween.MoveTo(circle, iTween.Hash("position", new Vector3(373, circle.transform.position.y, 0), "time", maxAudioTime - 1, "easeType", "linear"));
             }
 
@@ -184,28 +179,21 @@ public class MainController : MonoBehaviour
     {
         if (audioSource != null && audioSource.isPlaying && audioTime >= 0.0f)
         {
-            mouseTimer += Time.deltaTime;
-            if (mouseTimer > 0.1f)
-            {
-                paku();
-                mouseTimer = 0;
-                mouseClose = !mouseClose;
-            }
+//            mouseTimer += Time.deltaTime;
+//            if (mouseTimer > 0.2f)
+//            {
+//                paku();
+//                mouseTimer = 0;
+//                mouseClose = !mouseClose;
+//            }
             audioTime -= Time.deltaTime;
-            TimeSpan ts = TimeSpan.FromSeconds(audioTime);
-//			Debug.Log ("audioTime:" + audioTime + " ts:" + ts.Seconds);
             shortDescription.transform.localPosition = new Vector3(shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
             float nowAudioTime = maxAudioTime - audioTime;
             TimeSpan nts = TimeSpan.FromSeconds(nowAudioTime);
             startTime.GetComponent<Text>().text = nts.Seconds.ToString();
         }
-        // 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
-        if ((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f)
-        {
-            Debug.Log("audioTime less zero.");
-        }
     }
-
+/*
     void paku()
     {
         if (mouseClose)
@@ -217,7 +205,7 @@ public class MainController : MonoBehaviour
             faceUpdate.OnCallChangeFace(faceUpdate.animations[12].name);
         }
     }
-
+*/
     [System.Serializable]
     public class ArticleData
     {
