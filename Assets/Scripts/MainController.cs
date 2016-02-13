@@ -11,6 +11,7 @@ public class MainController : MonoBehaviour
     string urlBase = "http://210.140.161.190:3000/";
     public string filePath = "";
     private AudioSource audioSource;
+	private float audioTime;
 
     IEnumerator Start()
     {
@@ -27,6 +28,7 @@ public class MainController : MonoBehaviour
             new Vector2(0.5f, 0.5f)
         );
 
+		audioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
         StartCoroutine(download("test01.wav"));
     }
@@ -52,6 +54,18 @@ public class MainController : MonoBehaviour
             File.WriteAllBytes(filePath, www.bytes);
             Debug.Log("download file write success." + filePath);
             audioSource.PlayOneShot(www.audioClip);
+			// 音声の時間を保存しておく
+			audioTime = www.audioClip.length;
         }
     }
+
+	void Update() {
+		if(audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
+			audioTime -= Time.deltaTime;
+		}
+		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
+		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
+			Debug.Log ("audioTime less zero.");
+		}
+	}
 }
