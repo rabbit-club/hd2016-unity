@@ -80,11 +80,16 @@ public class MainController : MonoBehaviour
 				title.GetComponent<Text>().text = article.title;
 			}
 
+			// シークバーを動かす
 			if (circle != null) {
 				circle.transform.position = new Vector3(-204, circle.transform.position.y, circle.transform.position.z);
 				//				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(-204, circle.transform.position.y, 0), "time", 0, "easeType", "linear" ));
 				iTween.MoveTo(circle, iTween.Hash("position", new Vector3(373, circle.transform.position.y, 0), "time", maxAudioTime - 1, "easeType", "linear"));
 			}
+
+			// 音声時間maxの表示
+			TimeSpan maxTs = TimeSpan.FromSeconds(maxAudioTime);
+			endTime.GetComponent<Text>().text = maxTs.Seconds.ToString();
         }
     }
 
@@ -124,7 +129,6 @@ public class MainController : MonoBehaviour
 			float nowAudioTime = maxAudioTime - audioTime;
 			TimeSpan nts = TimeSpan.FromSeconds(nowAudioTime);
 			startTime.GetComponent<Text>().text = nts.Seconds.ToString();
-			endTime.GetComponent<Text>().text = ts.Seconds.ToString();
 		}
 		// 再生されていないのに音声秒数が入っているか、0を切っている場合は再生が終了している
 		if((audioSource != null && !audioSource.isPlaying && audioTime > 0.0f) || audioTime < 0.0f) {
