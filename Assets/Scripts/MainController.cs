@@ -36,6 +36,14 @@ public class MainController : MonoBehaviour
 		shortDescription = GameObject.Find("Canvas/Footer/subtitles/Text");
 		startTime = GameObject.Find("Canvas/Footer/Seekbar/Time");
 		endTime = GameObject.Find("Canvas/Footer/Seekbar/EndTime");
+
+		audioSource.PlayOneShot(Resources.Load("SE/start", typeof(AudioClip)) as AudioClip);
+		yield return new WaitForSeconds(0.5f);
+
+		AudioClip hello = Resources.Load ("Voices/ohiru", typeof(AudioClip)) as AudioClip;
+		audioSource.PlayOneShot(hello);
+		yield return new WaitForSeconds(2.5f);
+
         // JSON取得
         WWW www = new WWW(urlBase + "articles");
         yield return www;
@@ -45,7 +53,7 @@ public class MainController : MonoBehaviour
 			// 音声の取得と再生
 			yield return new WaitForSeconds(audioTime);
             StartCoroutine(download(article.voicePathWav));
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSeconds(1.0f);
 
 			www = new WWW(article.imagePath);
 			yield return www;
