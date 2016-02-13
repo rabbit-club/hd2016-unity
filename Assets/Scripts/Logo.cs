@@ -6,13 +6,17 @@ public class Logo : MonoBehaviour, IPointerClickHandler {
 	GameObject MainObject;
 	MainController MainController;
 
-	public GameObject UnityChan;
+	GameObject UnityChan;
 	Animator UnityChanAnim;
+
+	public GameObject Circle;
 
 	void Start() {
 	}
 
 	public void OnPointerClick (PointerEventData eventData){
+		iTween.MoveAdd( Circle, new Vector3(588, 0, 0), 180f );
+
 		UnityChan = GameObject.Find ("unitychan");
 		UnityChanAnim = UnityChan.GetComponent<Animator>();
 		UnityChanAnim.SetBool ("Next", true);
