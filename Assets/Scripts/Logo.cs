@@ -28,9 +28,6 @@ public class Logo : MonoBehaviour, IPointerClickHandler {
 	}
 
 	public void Reset() {
-		UnityChan.SetActive (false);
-		UnityChan.SetActive (true);
-		UnityChanAnim.SetBool ("Next", true);
-		MainController.Movie();
+		Application.LoadLevel("Main");
 	}
 }
