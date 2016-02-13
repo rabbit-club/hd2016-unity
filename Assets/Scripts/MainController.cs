@@ -14,13 +14,15 @@ public class MainController : MonoBehaviour
     private AudioSource audioSource;
 	private float audioTime;
 
-	public GameObject UnityChan;
-	Animator UnityChanAnim;
+	void Start() {
+	}
 
-    IEnumerator Start()
+	public void Movie() {
+		StartCoroutine(MovieStart());
+	}
+
+    IEnumerator MovieStart()
     {
-		UnityChanAnim = UnityChan.GetComponent<Animator>();
-
         DisplaySprite = Display.GetComponent<SpriteRenderer>();
 		audioTime = 0.0f;
         audioSource = GetComponent<AudioSource>();
@@ -42,9 +44,7 @@ public class MainController : MonoBehaviour
 				new Rect(0, 0, 400, 300), 
 				new Vector2(0.5f, 0.5f)
 			);
-
         }
-
     }
 
     IEnumerator download(string filePathUrl)
