@@ -62,7 +62,7 @@ public class MainController : MonoBehaviour
 		foreach (var article in articles) {
 			// 音声の取得と再生
 			yield return new WaitForSeconds (audioTime);
-			StartCoroutine (download (article.voicePathWav));
+			StartCoroutine (download (article.voicePathMp3));
 			yield return new WaitForSeconds (1.0f);
 
 			www = new WWW (article.imagePath);
