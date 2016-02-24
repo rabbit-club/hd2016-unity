@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Collections;
 using LitJson;
+using System.Linq;
 
 public class MainController : MonoBehaviour
 {
@@ -23,9 +24,9 @@ public class MainController : MonoBehaviour
 	private GameObject endTime;
 	private GameObject circle;
 	public FaceUpdate faceUpdate;
-	Animator anim;
-	//    float mouseTimer;
-	//    bool mouseClose;
+	GameObject UnityChan;
+	UnityChanTouch unityChanTouch;
+	bool isOffLine = false;
 
 	public void Movie ()
 	{
@@ -34,10 +35,8 @@ public class MainController : MonoBehaviour
 
 	IEnumerator MovieStart ()
 	{
-//        mouseTimer = 0;
-//        mouseClose = true;
-		anim = faceUpdate.anim;
-		anim.CrossFade (faceUpdate.animations [12].name, 0);
+		UnityChan = GameObject.Find ("unitychan");
+		unityChanTouch = UnityChan.GetComponent<UnityChanTouch>();
 		DisplaySprite = Display.GetComponent<SpriteRenderer> ();
 		audioTime = 0.0f;
 		maxAudioTime = 0.0f;
@@ -48,17 +47,25 @@ public class MainController : MonoBehaviour
 		endTime = GameObject.Find ("Canvas/Footer/Seekbar/EndTime");
 		circle = GameObject.Find ("Canvas/Footer/Seekbar/circle");
 
-		audioSource.PlayOneShot (Resources.Load ("SE/start", typeof(AudioClip)) as AudioClip);
-		yield return new WaitForSeconds (0.5f);
+		AudioClip seStart = Resources.Load ("SE/start", typeof(AudioClip)) as AudioClip;
+		audioSource.PlayOneShot(seStart);
+		yield return new WaitForSeconds(seStart.length);
 
-		AudioClip hello = Resources.Load ("Voices/ohiru", typeof(AudioClip)) as AudioClip;
-		audioSource.PlayOneShot (hello);
-		yield return new WaitForSeconds (2.5f);
+		AudioClip hello = Resources.Load("Voices/ohiru", typeof(AudioClip)) as AudioClip;
+		audioSource.PlayOneShot(hello);
+		audioTime += hello.length; // 挨拶音声の時間を初回のウェイトにする
+		audioTime += 0.5f;         // ワンテンポの間
 
 		// JSON取得
 		WWW www = new WWW (urlBase + "articles?mode=y");
 		yield return www;
 		ArticleData[] articles = JsonMapper.ToObject<ArticleData[]> (www.text);
+
+		// ローカルキャッシュを作成する
+//		createLocalCache(articles);
+		if(isOffLine) {
+			return false;
+		}
 		foreach (var article in articles) {
 			// 音声の取得と再生
 			yield return new WaitForSeconds (audioTime);
@@ -149,13 +156,11 @@ public class MainController : MonoBehaviour
 		if (!string.IsNullOrEmpty (www.error)) { // ダウンロードでエラーが発生した
 			Debug.Log ("error:" + www.error);
 		} else { // ダウンロードが正常に完了した
-			Debug.Log ("download success.");
 			filePath = Application.persistentDataPath + "/" + Path.GetFileName (www.url);
 			File.WriteAllBytes (filePath, www.bytes);
 			Debug.Log ("download file write success." + filePath);
-//            audioSource.PlayOneShot(www.audioClip);
 			audioSource.clip = www.audioClip;
-			audioSource.Play ();
+			audioSource.Play();
 			// 音声の時間を保存しておく
 			maxAudioTime = www.audioClip.length;
 			audioTime = maxAudioTime;
@@ -165,33 +170,22 @@ public class MainController : MonoBehaviour
 	void Update ()
 	{
 		if (audioSource != null && audioSource.isPlaying && audioTime >= 0.0f) {
-//            mouseTimer += Time.deltaTime;
-//            if (mouseTimer > 0.2f)
-//            {
-//                paku();
-//                mouseTimer = 0;
-//                mouseClose = !mouseClose;
-//            }
+			// 口パク
+			unityChanTouch.useLip = true;
+
 			audioTime -= Time.deltaTime;
 			shortDescription.transform.localPosition = new Vector3 (shortDescription.transform.localPosition.x - (Time.deltaTime * 240.0f), shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
 			float nowAudioTime = maxAudioTime - audioTime;
 			TimeSpan nts = TimeSpan.FromSeconds (nowAudioTime);
-			startTime.GetComponent<Text> ().text = nts.Seconds.ToString ();
+			startTime.GetComponent<Text>().text = nts.Seconds.ToString();
 		}
 	}
-	/*
-    void paku()
-    {
-        if (mouseClose)
-        {
-            faceUpdate.OnCallChangeFace(faceUpdate.animations[0].name);
-        }
-        else
-        {
-            faceUpdate.OnCallChangeFace(faceUpdate.animations[12].name);
-        }
-    }
-*/
+
+	void createLocalCache(ArticleData[] articles) {
+		string json = LitJson.JsonMapper.ToJson(articles);
+		PlayerPrefs.SetString("ONEWS_ARTICLES", json);
+	}
+
 	[System.Serializable]
 	public class ArticleData
 	{

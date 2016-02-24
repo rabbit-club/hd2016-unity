@@ -7,7 +7,7 @@ public class Logo : MonoBehaviour, IPointerClickHandler {
 	MainController MainController;
 
 	GameObject UnityChan;
-	Animator UnityChanAnim;
+//	Animator UnityChanAnim;
 
 	public GameObject Circle;
 
@@ -17,13 +17,12 @@ public class Logo : MonoBehaviour, IPointerClickHandler {
 	public void OnPointerClick (PointerEventData eventData){
 //		iTween.MoveAdd( Circle, new Vector3(588, 0, 0), 180f );
 
-		UnityChan = GameObject.Find ("unitychan");
-		UnityChanAnim = UnityChan.GetComponent<Animator>();
-		UnityChanAnim.SetBool ("Next", true);
+//		UnityChan = GameObject.Find ("unitychan");
+//		UnityChanAnim = UnityChan.GetComponent<Animator>();
+//		UnityChanAnim.SetBool ("Next", true);
 
 		MainController = GameObject.Find("Camera").GetComponent<MainController>();;
 		MainController.Movie();
-		Debug.Log ( "OnPointerClick :" + eventData );
 		this.gameObject.SetActive(false);
 	}
 
