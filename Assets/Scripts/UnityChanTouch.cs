@@ -6,6 +6,7 @@ public class UnityChanTouch : TapBehaviour {
 
 	Animator anim;
 	SkinnedMeshRenderer skinMesh;
+	float rndAnimTimer = 0.0f;
 	float mouseTimer = 0.0f;
 	bool mouseClose = true;
 	public bool useLip = false;
@@ -15,10 +16,57 @@ public class UnityChanTouch : TapBehaviour {
 		anim = GetComponent<Animator>();
 		skinMesh = this.GetComponentsInChildren<SkinnedMeshRenderer>().First(s => s.name == "MTH_DEF");
 //		useLip = true; //デバッグ用
+		rndAnimTimer = Random.Range(5.0f, 10.0f);
 	}
 
 	// タッチしたときに呼ばれる。
-	public override void TapDown(ref RaycastHit hit){
+	public override void TapDown(ref RaycastHit hit) {
+		// アニメーションしたのでランダムアニメーションの値は再取得する
+		rndAnimTimer = Random.Range(8.0f, 18.0f);
+		// アニメーションさせる
+		unityChanAnimation();
+	}
+	
+	void Update() {
+		if(anim != null) {
+			rndAnimTimer -= Time.deltaTime;
+			if(anim.GetCurrentAnimatorStateInfo(0).IsName("FIRST_WAIT")) {
+				// 初めのポーズを取るため一瞬動かしてからアニメーションをストップさせ口パクに譲る
+				if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.3f) {
+					anim.Stop();
+				}
+			} else if(anim.GetCurrentAnimatorStateInfo(0).IsName("WAIT00")) {
+				if(nowAnimation) {
+					anim.Stop();
+					nowAnimation = false;
+				}
+			}
+
+			if(rndAnimTimer <= 0.0f) {
+				unityChanAnimation();
+				rndAnimTimer = Random.Range(8.0f, 18.0f);
+			}
+		}
+		if(useLip) {
+			// 口パク
+			mouseTimer += Time.deltaTime;
+			if (mouseTimer > 0.1f) {
+				paku();
+				mouseTimer = 0;
+			}
+		}
+	}
+
+	void paku() {
+		if (mouseClose) {
+			skinMesh.SetBlendShapeWeight(0, 0.0f);
+		} else {
+			skinMesh.SetBlendShapeWeight(0, 50.0f);
+		}
+		mouseClose = !mouseClose;
+	}
+
+	void unityChanAnimation() {
 		anim.Rebind();
 		nowAnimation = true;
 		int animIndex = Random.Range(0, 5); // intの場合max値は含まない
@@ -42,38 +90,4 @@ public class UnityChanTouch : TapBehaviour {
 			break;
 		}
 	}
-	
-	void Update() {
-		if(anim != null) {
-			if(anim.GetCurrentAnimatorStateInfo(0).IsName("FIRST_WAIT")) {
-				// 初めのポーズを取るため一瞬動かしてからアニメーションをストップさせ口パクに譲る
-				if(anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.3f) {
-					anim.Stop();
-				}
-			} else if(anim.GetCurrentAnimatorStateInfo(0).IsName("WAIT00")) {
-				if(nowAnimation) {
-					anim.Stop();
-					nowAnimation = false;
-				}
-			}
-		}
-		if(useLip) {
-			// 口パク
-			mouseTimer += Time.deltaTime;
-			if (mouseTimer > 0.1f) {
-				paku();
-				mouseTimer = 0;
-			}
-		}
-	}
-
-	void paku() {
-		if (mouseClose) {
-			skinMesh.SetBlendShapeWeight(0, 0.0f);
-		} else {
-			skinMesh.SetBlendShapeWeight(0, 50.0f);
-		}
-		mouseClose = !mouseClose;
-	}
-
 }
