@@ -27,6 +27,10 @@ public class MainController : MonoBehaviour
 	GameObject UnityChan;
 	UnityChanTouch unityChanTouch;
 	bool isOffLine = false;
+	// 後ろのボードx
+	int backBoardX = 400;
+	// 後ろのボードy
+	int backBoardY = 300;
 
 	public void Movie ()
 	{
@@ -72,53 +76,13 @@ public class MainController : MonoBehaviour
 			StartCoroutine (download (article.voicePathMp3));
 			yield return new WaitForSeconds (1.0f);
 
+			// 画像を取得する
 			www = new WWW (article.imagePath);
 			yield return www;
 
 			Texture2D tex = www.texture;
-			int x = 400;
-			int y = 300;
-			if (tex.width >= x && tex.height >= y) {
-				DisplaySprite.sprite = Sprite.Create (
-					tex, 
-					new Rect (0, 0, x, y), 
-					new Vector2 (0.5f, 0.5f)
-				);
-			} else if (tex.width >= x || tex.height < y) {
-				double tmpWidth = tex.width;
-				double tmpHeight = tex.height;
-				double yy = y;
-				double d = (double)(tmpWidth * (yy / tmpHeight));
-				double e = (double)(tmpHeight * (yy / tmpHeight));
-				int a = (int)Math.Ceiling (d);
-				int b = (int)Math.Ceiling (e);
-				TextureScale.Bilinear (tex, a, b);
-				DisplaySprite.sprite = Sprite.Create (
-					tex, 
-					new Rect (0, 0, x, y), 
-					new Vector2 (0.5f, 0.5f)
-				);
-			} else if (tex.width < x || tex.height >= y) {
-				double tmpWidth = tex.width;
-				double tmpHeight = tex.height;
-				double xx = x;
-				double d = (double)(tmpWidth * (xx / tmpWidth));
-				double e = (double)(tmpHeight * (xx / tmpWidth));
-				int a = (int)Math.Ceiling (d);
-				int b = (int)Math.Ceiling (e);
-				TextureScale.Bilinear (tex, a, b);
-				DisplaySprite.sprite = Sprite.Create (
-					tex, 
-					new Rect (0, 0, x, y), 
-					new Vector2 (0.5f, 0.5f)
-				);
-			} else {
-				DisplaySprite.sprite = Sprite.Create (
-					tex, 
-					new Rect (0, 0, tex.width, tex.height), 
-					new Vector2 (0.5f, 0.5f)
-				);
-			}
+			// 画像をリサイズする
+			reseizeTexture(tex);
 
 			// 要約記事テキストの表示
 			if (shortDescription != null) {
@@ -179,6 +143,35 @@ public class MainController : MonoBehaviour
 			TimeSpan nts = TimeSpan.FromSeconds (nowAudioTime);
 			startTime.GetComponent<Text>().text = nts.Seconds.ToString();
 		}
+	}
+
+	// 画像のテクスチャをリサイズする
+	void reseizeTexture(Texture2D tex) {
+		Debug.Log("texsize height:" + tex.height + " width:" + tex.width);
+		float fixedHeight = tex.height;
+		float fixedWidth = tex.width;
+		// 画像サイズがパネルサイズより小さければリサイズせずに適用する。どちらかが越えていればリサイズを行う。
+		if (tex.width > backBoardX || tex.height > backBoardY) {
+			// 式：リサイズ対象の元となる辺ではない方の辺から引く長さ＝（リサイズ対象の元となる辺ー変更後サイズ）の絶対値 * (リサイズ対象の元となる辺ではない方の辺 / リサイズ対象の元となる辺)
+			if ((tex.width - backBoardX) >= (tex.height - backBoardY)) {
+				float resizeBaseX = tex.width;
+				float resizeBaseY = tex.height - (Mathf.Abs (resizeBaseX - backBoardX) * (tex.height / resizeBaseX));
+				Debug.Log("resizeBaseX:" + resizeBaseX + " backBoardX:" + backBoardX + " resizeBaseY:" + resizeBaseY);
+				TextureScale.Bilinear(tex, backBoardX, (int)resizeBaseY);
+				fixedHeight = resizeBaseY;
+			} else {
+				float resizeBaseY = tex.height;
+				float resizeBaseX = tex.width - (Mathf.Abs (resizeBaseY - backBoardY) * (tex.width / resizeBaseY));
+				TextureScale.Bilinear(tex, (int)resizeBaseX, backBoardY);
+				fixedWidth = resizeBaseX;
+			}
+		}
+		Debug.Log("fixedWidth:" + fixedWidth + " fixedHeight:" + fixedHeight);
+		DisplaySprite.sprite = Sprite.Create (
+			tex, 
+			new Rect (0, 0, tex.width, tex.height), 
+			new Vector2 (0.5f, 0.5f)
+		);
 	}
 
 	void createLocalCache(ArticleData[] articles) {
