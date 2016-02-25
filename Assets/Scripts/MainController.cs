@@ -168,7 +168,7 @@ public class MainController : MonoBehaviour
 			tex, 
 			new Rect (0, 0, width, height), 
 			new Vector2 (0.5f, 0.5f)
-		);	
+		);
 	}
 
 	void createLocalCache(ArticleData[] articles) {
