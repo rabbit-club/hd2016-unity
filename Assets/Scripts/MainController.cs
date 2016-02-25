@@ -27,10 +27,10 @@ public class MainController : MonoBehaviour
 	GameObject UnityChan;
 	UnityChanTouch unityChanTouch;
 	bool isOffLine = false;
-	// 後ろのボードx
-	int backBoardX = 400;
-	// 後ろのボードy
-	int backBoardY = 300;
+
+	// ディスプレイサイズ
+	double displayWidth = 400;
+	double displayHeight = 300;
 
 	public void Movie ()
 	{
@@ -145,31 +145,28 @@ public class MainController : MonoBehaviour
 		}
 	}
 
-	// 画像のテクスチャをリサイズする
+	// 画像をディスプレイに内接する最大サイズにリサイズしてセット
 	void reseizeTexture(Texture2D tex) {
-		Debug.Log("texsize height:" + tex.height + " width:" + tex.width);
-		float fixedHeight = tex.height;
-		float fixedWidth = tex.width;
-		// 画像サイズがパネルサイズより小さければリサイズせずに適用する。どちらかが越えていればリサイズを行う。
-		if (tex.width > backBoardX || tex.height > backBoardY) {
-			// 式：リサイズ対象の元となる辺ではない方の辺から引く長さ＝（リサイズ対象の元となる辺ー変更後サイズ）の絶対値 * (リサイズ対象の元となる辺ではない方の辺 / リサイズ対象の元となる辺)
-			if ((tex.width - backBoardX) >= (tex.height - backBoardY)) {
-				float resizeBaseX = tex.width;
-				float resizeBaseY = tex.height - (Mathf.Abs (resizeBaseX - backBoardX) * (tex.height / resizeBaseX));
-				Debug.Log("resizeBaseX:" + resizeBaseX + " backBoardX:" + backBoardX + " resizeBaseY:" + resizeBaseY);
-				TextureScale.Bilinear(tex, backBoardX, (int)resizeBaseY);
-				fixedHeight = resizeBaseY;
-			} else {
-				float resizeBaseY = tex.height;
-				float resizeBaseX = tex.width - (Mathf.Abs (resizeBaseY - backBoardY) * (tex.width / resizeBaseY));
-				TextureScale.Bilinear(tex, (int)resizeBaseX, backBoardY);
-				fixedWidth = resizeBaseX;
-			}
+		double texWidth = tex.width;
+		double texHeight = tex.height;
+		double ratio = 1;
+
+		// 4:3よりも縦長か横長か
+		if (texWidth / texHeight >= displayWidth / displayHeight) {
+			ratio = displayWidth / texWidth;
+		}  else {
+			ratio = displayHeight / texHeight;
 		}
-		Debug.Log("fixedWidth:" + fixedWidth + " fixedHeight:" + fixedHeight);
+
+		double dWidth = (double)(texWidth * ratio);
+		double dHeight = (double)(texHeight * ratio);
+		int width = (int)Math.Ceiling (dWidth);
+		int height = (int)Math.Ceiling (dHeight);
+
+		TextureScale.Bilinear (tex, width, height);
 		DisplaySprite.sprite = Sprite.Create (
 			tex, 
-			new Rect (0, 0, tex.width, tex.height), 
+			new Rect (0, 0, width, height), 
 			new Vector2 (0.5f, 0.5f)
 		);
 	}
