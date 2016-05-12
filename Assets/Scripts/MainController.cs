@@ -12,8 +12,8 @@ public class MainController : MonoBehaviour
 {
 	public GameObject Display;
 	SpriteRenderer DisplaySprite;
-	string imageUrl;
-	string urlBase = "http://210.140.161.190:3000/";
+//	string urlBase = "http://210.140.161.190:3000/";
+	string urlBase = "https://www.dropbox.com/s/mxdqxbrk6bt5p09/articles.json?dl=1";
 	public string filePath = "";
 	private AudioSource audioSource;
 	private float maxAudioTime;
@@ -61,7 +61,7 @@ public class MainController : MonoBehaviour
 		audioTime += 0.5f;         // ワンテンポの間
 
 		// JSON取得
-		WWW www = new WWW (urlBase + "articles?mode=y");
+		WWW www = new WWW (urlBase);
 		yield return www;
 		ArticleData[] articles = JsonMapper.ToObject<ArticleData[]> (www.text);
 
@@ -73,11 +73,14 @@ public class MainController : MonoBehaviour
 		foreach (var article in articles) {
 			// 音声の取得と再生
 			yield return new WaitForSeconds (audioTime);
-			StartCoroutine (download (article.voicePathMp3));
+			StartCoroutine (download (article.voice));
 			yield return new WaitForSeconds (1.0f);
 
 			// 画像を取得する
-			www = new WWW (article.imagePath);
+			if (article.image == "") {
+				article.image = "http://i.yimg.jp/images/jpnews/cre/common/all/images/fbico_ogp_1200x630.png";
+			}
+			www = new WWW (article.image);
 			yield return www;
 
 			Texture2D tex = www.texture;
@@ -88,7 +91,7 @@ public class MainController : MonoBehaviour
 			if (shortDescription != null) {
 				// 位置を初期化
 				shortDescription.transform.localPosition = new Vector3 (5500.0f, shortDescription.transform.localPosition.y, shortDescription.transform.localPosition.z);
-				shortDescription.GetComponent<Text> ().text = article.shortDescription;
+				shortDescription.GetComponent<Text> ().text = article.description;
 			}
 
 			// 記事タイトルの表示
@@ -123,10 +126,10 @@ public class MainController : MonoBehaviour
 			filePath = Application.persistentDataPath + "/" + Path.GetFileName (www.url);
 			File.WriteAllBytes (filePath, www.bytes);
 			Debug.Log ("download file write success." + filePath);
-			audioSource.clip = www.audioClip;
+			audioSource.clip = www.GetAudioClip(false, true, AudioType.MPEG);
 			audioSource.Play();
 			// 音声の時間を保存しておく
-			maxAudioTime = www.audioClip.length;
+			maxAudioTime = www.GetAudioClip(false, true, AudioType.MPEG).length;
 			audioTime = maxAudioTime;
 		}
 	}
@@ -179,12 +182,10 @@ public class MainController : MonoBehaviour
 	[System.Serializable]
 	public class ArticleData
 	{
-		public string url;
+		public string link;
 		public string title;
-		public string shortDescription;
-		public string imagePath;
-		public string voicePathOgg;
-		public string voicePathWav;
-		public string voicePathMp3;
+		public string description;
+		public string image;
+		public string voice;
 	}
 }
